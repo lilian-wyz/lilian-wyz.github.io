@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Rotating Particle Sphere</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #000; /* 背景颜色 */
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        // 初始化场景、相机和渲染器
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // 创建粒子几何体
+        const particleCount = 5000; // 粒子数量
+        const particleGeometry = new THREE.BufferGeometry();
+        const positions = []; // 粒子位置
+        const colors = []; // 粒子颜色
+
+        // 创建球形粒子分布
+        for (let i = 0; i < particleCount; i++) {
+            // 球体表面分布公式
+            const radius = 50; // 球体半径
+            const phi = Math.acos(2 * Math.random() - 1); // 纬度角
+            const theta = 2 * Math.PI * Math.random(); // 经度角
+
+            const x = radius * Math.sin(phi) * Math.cos(theta);
+            const y = radius * Math.sin(phi) * Math.sin(theta);
+            const z = radius * Math.cos(phi);
+
+            positions.push(x, y, z);
+
+            // 设置渐变色（随机）
+            const r = Math.random();
+            const g = Math.random();
+            const b = Math.random();
+            colors.push(r, g, b);
+        }
+
+        // 设置几何体的属性
+        particleGeometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+        particleGeometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+
+        // 粒子材质
+        const particleMaterial = new THREE.PointsMaterial({
+            size: 0.8, // 粒子大小
+            vertexColors: true, // 启用顶点颜色
+            transparent: true,
+            opacity: 0.9,
+        });
+
+        // 创建粒子系统
+        const particleSystem = new THREE.Points(particleGeometry, particleMaterial);
+        scene.add(particleSystem);
+
+        // 设置相机位置
+        camera.position.z = 150;
+
+        // 动画
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // 让粒子系统旋转
+            particleSystem.rotation.y += 0.002;
+            particleSystem.rotation.x += 0.001;
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        // 自适应窗口大小
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
